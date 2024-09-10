@@ -10,6 +10,7 @@ func SetupRoutes(app *fiber.App, stg storage.Storage) {
 	beverageController := controllers.NewController(stg)
 
 	app.Get("/beverages", beverageController.GetAllBeverages)
+	app.Get("/beverage/:id", beverageController.GetBeverage)
 
 	app.Post("/beverage", beverageController.CreateBeverage)
 }

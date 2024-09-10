@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"database/sql"
 	"log"
 )
 
@@ -40,6 +41,23 @@ func (s *Storage) GetAllBeverages(ctx context.Context) ([]Beverage, error) {
 	}
 
 	return beverages, nil
+}
+
+// Функция для получения напитка
+func (s *Storage) GetBeverage(ctx context.Context, id int) (*Beverage, error) {
+	row := s.DB.QueryRowContext(ctx, "SELECT name, type, price FROM beverages WHERE id=$1", id)
+	var beverage Beverage
+	err := row.Scan(&beverage.Name, &beverage.Type, &beverage.Price)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("Напиток с таким id не найден")
+			return nil, err
+		}
+		log.Println("Ошибка при чтении данных:", err)
+		return nil, err
+	}
+
+	return &beverage, nil
 }
 
 // Функция для добавления напитка

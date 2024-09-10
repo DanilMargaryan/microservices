@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/DanilMargaryan/microservices/internal/storage"
 	"github.com/gofiber/fiber/v3"
+	"strconv"
 )
 
 type MainController struct {
@@ -34,4 +35,19 @@ func (c *MainController) GetAllBeverages(ctx fiber.Ctx) error {
 		return ctx.Status(500).SendString("Ошибка при получении данных")
 	}
 	return ctx.JSON(beverages)
+}
+
+func (c *MainController) GetBeverage(ctx fiber.Ctx) error {
+	idStr := ctx.Params("id")
+	id, _ := strconv.Atoi(idStr)
+	beverage, err := c.storage.GetBeverage(context.Background(), id)
+	if err != nil {
+		return ctx.Status(500).SendString("Ошибка при получении данных")
+	}
+
+	if beverage == nil {
+		return ctx.Status(404).SendString("Напиток не найден")
+	}
+
+	return ctx.JSON(beverage)
 }
