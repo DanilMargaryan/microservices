@@ -1,0 +1,99 @@
+basePath: /
+definitions:
+  storage.Beverage:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      type:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+  description: API для управления напитками.
+  title: Beverage API
+  version: "1.0"
+paths:
+  /beverage:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый напиток в базу данных
+      parameters:
+      - description: Данные напитка
+        in: body
+        name: beverage
+        required: true
+        schema:
+          $ref: '#/definitions/storage.Beverage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Напиток успешно добавлен!
+          schema:
+            type: string
+        "400":
+          description: Ошибка при парсинге тела запроса
+          schema:
+            type: string
+        "500":
+          description: Ошибка при добавлении напитка в базу данных
+          schema:
+            type: string
+      summary: Добавить новый напиток
+      tags:
+      - beverages
+  /beverage/{id}:
+    get:
+      description: Возвращает данные напитка по его идентификатору
+      parameters:
+      - description: ID напитка
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/storage.Beverage'
+        "404":
+          description: Напиток не найден
+          schema:
+            type: string
+        "500":
+          description: Ошибка при получении данных
+          schema:
+            type: string
+      summary: Получить напиток по id
+      tags:
+      - beverages
+  /beverages:
+    get:
+      description: Возвращает список всех напитков из базы данных
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/storage.Beverage'
+            type: array
+        "500":
+          description: Ошибка при получении данных
+          schema:
+            type: string
+      summary: Получить все напитки
+      tags:
+      - beverages
+swagger: "2.0"

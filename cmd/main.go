@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/DanilMargaryan/microservices/docs"
 	"github.com/DanilMargaryan/microservices/internal/api/rest"
 	"github.com/DanilMargaryan/microservices/internal/config"
 	"github.com/DanilMargaryan/microservices/internal/storage"
@@ -8,6 +9,14 @@ import (
 	"log"
 )
 
+// @title Beverage API
+// @version 1.0
+// @description API для управления напитками.
+// @host localhost:3000
+// @BasePath /v2
+
+// @contact.name API Support
+// @contact.email support@swagger.io
 func main() {
 	cfg := config.MustLoad()
 

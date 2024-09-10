@@ -14,7 +14,14 @@ type Beverage struct {
 	Description string  `json:"description"`
 }
 
-// Функция для получения всех напитков из таблицы
+// GetAllBeverages godoc
+// @Summary Получить все напитки
+// @Description Возвращает список всех напитков из базы данных
+// @Tags beverages
+// @Produce  json
+// @Success 200 {array} storage.Beverage
+// @Failure 500 {string} string "Ошибка при получении данных"
+// @Router /beverages [get]
 func (s *Storage) GetAllBeverages(ctx context.Context) ([]Beverage, error) {
 	rows, err := s.DB.QueryContext(ctx, "SELECT name, type, price FROM beverages")
 	if err != nil {
@@ -43,7 +50,16 @@ func (s *Storage) GetAllBeverages(ctx context.Context) ([]Beverage, error) {
 	return beverages, nil
 }
 
-// Функция для получения напитка
+// GetBeverage godoc
+// @Summary Получить напиток по id
+// @Description Возвращает данные напитка по его идентификатору
+// @Tags beverages
+// @Produce  json
+// @Param id path int true "ID напитка"
+// @Success 200 {object} storage.Beverage
+// @Failure 404 {string} string "Напиток не найден"
+// @Failure 500 {string} string "Ошибка при получении данных"
+// @Router /beverage/{id} [get]
 func (s *Storage) GetBeverage(ctx context.Context, id int) (*Beverage, error) {
 	row := s.DB.QueryRowContext(ctx, "SELECT name, type, price FROM beverages WHERE id=$1", id)
 	var beverage Beverage
@@ -60,7 +76,17 @@ func (s *Storage) GetBeverage(ctx context.Context, id int) (*Beverage, error) {
 	return &beverage, nil
 }
 
-// Функция для добавления напитка
+// CreateBeverage godoc
+// @Summary Добавить новый напиток
+// @Description Добавляет новый напиток в базу данных
+// @Tags beverages
+// @Accept  json
+// @Produce  json
+// @Param beverage body storage.Beverage true "Данные напитка"
+// @Success 201 {string} string "Напиток успешно добавлен!"
+// @Failure 400 {string} string "Ошибка при парсинге тела запроса"
+// @Failure 500 {string} string "Ошибка при добавлении напитка в базу данных"
+// @Router /beverage [post]
 func (s *Storage) CreateBeverage(ctx context.Context, newBeverage Beverage) error {
 	stmt, err := s.DB.PrepareContext(ctx, "INSERT INTO beverages (name, type, price, description) VALUES($1, $2, $3, $4)")
 	if err != nil {
