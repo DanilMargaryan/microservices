@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	_ "github.com/DanilMargaryan/microservices/docs"
 	"github.com/DanilMargaryan/microservices/internal/api/rest"
 	"github.com/DanilMargaryan/microservices/internal/config"
 	"github.com/DanilMargaryan/microservices/internal/storage"
 	"github.com/gofiber/fiber/v3"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 // @title Beverage API
@@ -20,7 +24,10 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-	stg, err := storage.New(&cfg.PostgreSQL)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	stg, err := storage.New(ctx, &cfg.PostgreSQL)
 
 	if err != nil {
 		log.Fatalf("Ошибка инициализации базы данных: %v", err)

@@ -1,35 +1,36 @@
 package storage
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"github.com/DanilMargaryan/microservices/internal/config"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 )
 
-// Структура, содержащая подключение к базе данных
 type Storage struct {
-	DB *sql.DB
+	pool *pgxpool.Pool
 }
 
-func New(cfg *config.PostgreSQL) (*Storage, error) {
-	psqlConn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+func New(ctx context.Context, cfg *config.PostgreSQL) (*Storage, error) {
+	connString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 
-	db, err := sql.Open("postgres", psqlConn)
+	config, err := pgxpool.ParseConfig(connString)
 	if err != nil {
 		return nil, err
 	}
-
-	err = db.Ping()
+	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeCacheDescribe
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Println("Connected!")
-	return &Storage{DB: db}, nil
+	return &Storage{pool}, nil
 }
 
-func (s *Storage) Close() error {
-	return s.DB.Close()
+func (s *Storage) Close() {
+	s.pool.Close()
 }

@@ -3,16 +3,21 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"log"
+	"github.com/pkg/errors"
 )
 
-// Структура для напитков
 type Beverage struct {
 	Name        string  `json:"name"`
 	Type        string  `json:"type"`
 	Price       float64 `json:"price"`
 	Description string  `json:"description"`
 }
+
+const (
+	getAllBeverages = "SELECT name, type, price FROM beverages"
+	getBeverage     = "SELECT name, type, price FROM beverages WHERE id=$1"
+	createBeverage  = "INSERT INTO beverages (name, type, price, description) VALUES($1, $2, $3, $4)"
+)
 
 // GetAllBeverages godoc
 // @Summary Получить все напитки
@@ -23,10 +28,11 @@ type Beverage struct {
 // @Failure 500 {string} string "Ошибка при получении данных"
 // @Router /beverages [get]
 func (s *Storage) GetAllBeverages(ctx context.Context) ([]Beverage, error) {
-	rows, err := s.DB.QueryContext(ctx, "SELECT name, type, price FROM beverages")
+	const op = "storage.beverage.GetAllBeverages"
+
+	rows, err := s.pool.Query(ctx, getAllBeverages)
 	if err != nil {
-		log.Println("Ошибка при выполнении запроса к базе данных:", err)
-		return nil, err
+		return nil, errors.Errorf("%s: %v", op, err)
 	}
 	defer rows.Close()
 
@@ -35,16 +41,13 @@ func (s *Storage) GetAllBeverages(ctx context.Context) ([]Beverage, error) {
 		var beverage Beverage
 		err := rows.Scan(&beverage.Name, &beverage.Type, &beverage.Price)
 		if err != nil {
-			log.Println("Ошибка при чтении данных:", err)
-			return nil, err
+			return nil, errors.Errorf("%s: %v", op, err)
 		}
 		beverages = append(beverages, beverage)
 	}
 
-	// Проверка ошибок после цикла
 	if err = rows.Err(); err != nil {
-		log.Println("Ошибка при итерации по строкам:", err)
-		return nil, err
+		return nil, errors.Errorf("%s: %v", op, err)
 	}
 
 	return beverages, nil
@@ -61,16 +64,16 @@ func (s *Storage) GetAllBeverages(ctx context.Context) ([]Beverage, error) {
 // @Failure 500 {string} string "Ошибка при получении данных"
 // @Router /beverage/{id} [get]
 func (s *Storage) GetBeverage(ctx context.Context, id int) (*Beverage, error) {
-	row := s.DB.QueryRowContext(ctx, "SELECT name, type, price FROM beverages WHERE id=$1", id)
+	const op = "storage.beverage.GetBeverage"
+
+	row := s.pool.QueryRow(ctx, getBeverage, id)
 	var beverage Beverage
 	err := row.Scan(&beverage.Name, &beverage.Type, &beverage.Price)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Println("Напиток с таким id не найден")
-			return nil, err
+			return nil, errors.Errorf("%s: %v", op, err)
 		}
-		log.Println("Ошибка при чтении данных:", err)
-		return nil, err
+		return nil, errors.Errorf("%s: %v", op, err)
 	}
 
 	return &beverage, nil
@@ -88,17 +91,12 @@ func (s *Storage) GetBeverage(ctx context.Context, id int) (*Beverage, error) {
 // @Failure 500 {string} string "Ошибка при добавлении напитка в базу данных"
 // @Router /beverage [post]
 func (s *Storage) CreateBeverage(ctx context.Context, newBeverage Beverage) error {
-	stmt, err := s.DB.PrepareContext(ctx, "INSERT INTO beverages (name, type, price, description) VALUES($1, $2, $3, $4)")
-	if err != nil {
-		log.Println("Ошибка при подготовке запроса:", err)
-		return err
-	}
-	defer stmt.Close()
+	const op = "storage.beverage.CreateBeverage"
 
-	_, err = stmt.ExecContext(ctx, newBeverage.Name, newBeverage.Type, newBeverage.Price, newBeverage.Description)
+	_, err := s.pool.Exec(ctx, createBeverage, newBeverage.Name, newBeverage.Type, newBeverage.Price, newBeverage.Description)
 	if err != nil {
-		log.Println("Ошибка при выполнении запроса:", err)
-		return err
+		// Возвращаем ошибку с пояснением
+		return errors.Errorf("%s: %v", op, err)
 	}
 
 	return nil
