@@ -18,7 +18,6 @@ import (
 // @description API для управления напитками.
 // @host localhost:3000
 // @BasePath /v2
-
 // @contact.name API Support
 // @contact.email support@swagger.io
 func main() {
