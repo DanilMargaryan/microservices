@@ -5,8 +5,8 @@ import (
 	_ "github.com/DanilMargaryan/microservices/docs"
 	"github.com/DanilMargaryan/microservices/internal/api/rest"
 	"github.com/DanilMargaryan/microservices/internal/config"
+	"github.com/DanilMargaryan/microservices/internal/servise"
 	"github.com/DanilMargaryan/microservices/internal/storage"
-	"github.com/gofiber/fiber/v3"
 	"log"
 	"os"
 	"os/signal"
@@ -33,9 +33,8 @@ func main() {
 	}
 	defer stg.Close()
 
-	app := fiber.New()
+	s := servise.NewHandler(stg)
 
-	rest.SetupRoutes(app, *stg)
-
+	app := rest.SetupRoutes(&rest.Routers{s})
 	log.Fatal(app.Listen(":3000"))
 }

@@ -6,6 +6,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type StorageInterface interface {
+	GetAllBeverages(ctx context.Context) ([]Beverage, error)
+	GetBeverage(ctx context.Context, id int) (*Beverage, error)
+	CreateBeverage(ctx context.Context, newBeverage Beverage) error
+}
+
 type Beverage struct {
 	Name        string  `json:"name"`
 	Type        string  `json:"type"`

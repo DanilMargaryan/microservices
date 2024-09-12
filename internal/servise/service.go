@@ -10,15 +10,21 @@ import (
 	"strconv"
 )
 
-type MainController struct {
-	storage storage.Storage
+type MainHandlerInterface interface {
+	CreateBeverage(ctx fiber.Ctx) error
+	GetAllBeverages(ctx fiber.Ctx) error
+	GetBeverage(ctx fiber.Ctx) error
 }
 
-func NewController(stg storage.Storage) *MainController {
-	return &MainController{storage: stg}
+type MainHandler struct {
+	storage storage.StorageInterface
 }
 
-func (c *MainController) CreateBeverage(ctx fiber.Ctx) error {
+func NewHandler(stg storage.StorageInterface) *MainHandler {
+	return &MainHandler{storage: stg}
+}
+
+func (c *MainHandler) CreateBeverage(ctx fiber.Ctx) error {
 	var newBeverage storage.Beverage
 
 	if err := json.Unmarshal(ctx.Body(), &newBeverage); err != nil {
@@ -38,7 +44,7 @@ func (c *MainController) CreateBeverage(ctx fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(response)
 }
 
-func (c *MainController) GetAllBeverages(ctx fiber.Ctx) error {
+func (c *MainHandler) GetAllBeverages(ctx fiber.Ctx) error {
 	beverages, err := c.storage.GetAllBeverages(context.Background())
 	if err != nil {
 		log.Error(err)
@@ -53,7 +59,7 @@ func (c *MainController) GetAllBeverages(ctx fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(response)
 }
 
-func (c *MainController) GetBeverage(ctx fiber.Ctx) error {
+func (c *MainHandler) GetBeverage(ctx fiber.Ctx) error {
 	idStr := ctx.Params("id")
 	id, _ := strconv.Atoi(idStr)
 	beverage, err := c.storage.GetBeverage(context.Background(), id)

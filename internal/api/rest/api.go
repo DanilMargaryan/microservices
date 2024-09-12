@@ -2,15 +2,20 @@ package rest
 
 import (
 	"github.com/DanilMargaryan/microservices/internal/servise"
-	"github.com/DanilMargaryan/microservices/internal/storage"
 	"github.com/gofiber/fiber/v3"
 )
 
-func SetupRoutes(app *fiber.App, stg storage.Storage) {
-	beverageController := servise.NewController(stg)
+type Routers struct {
+	MainHandler servise.MainHandlerInterface
+}
 
-	app.Get("/beverages", beverageController.GetAllBeverages)
-	app.Get("/beverage/:id", beverageController.GetBeverage)
+func SetupRoutes(r *Routers) *fiber.App {
+	app := fiber.New()
 
-	app.Post("/beverage", beverageController.CreateBeverage)
+	app.Get("/beverages", r.MainHandler.GetAllBeverages)
+	app.Get("/beverage/:id", r.MainHandler.GetBeverage)
+
+	app.Post("/beverage", r.MainHandler.CreateBeverage)
+
+	return app
 }
