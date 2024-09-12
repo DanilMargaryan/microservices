@@ -20,7 +20,7 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-	stg, err := storage.New(cfg)
+	stg, err := storage.New(&cfg.PostgreSQL)
 
 	if err != nil {
 		log.Fatalf("Ошибка инициализации базы данных: %v", err)

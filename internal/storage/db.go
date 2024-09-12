@@ -12,7 +12,7 @@ type Storage struct {
 	DB *sql.DB
 }
 
-func New(cfg *config.Config) (*Storage, error) {
+func New(cfg *config.PostgreSQL) (*Storage, error) {
 	psqlConn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 

@@ -6,12 +6,15 @@ import (
 )
 
 type Config struct {
-	// Параметры для подключения к базе данных
-	DBHost     string `envconfig:"DB_HOST"`
-	DBPort     int    `envconfig:"DB_PORT"`
-	DBUser     string `envconfig:"DB_USER"`
-	DBPassword string `envconfig:"DB_PASSWORD"`
-	DBName     string `envconfig:"DB_NAME"`
+	PostgreSQL PostgreSQL
+}
+
+type PostgreSQL struct {
+	DBHost     string `envconfig:"DB_HOST" required:"true"`
+	DBPort     int    `envconfig:"DB_PORT" required:"true"`
+	DBUser     string `envconfig:"DB_USER" required:"true"`
+	DBPassword string `envconfig:"DB_PASSWORD" required:"true"`
+	DBName     string `envconfig:"DB_NAME" required:"true"`
 }
 
 func MustLoad() *Config {
