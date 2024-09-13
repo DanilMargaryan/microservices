@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.20.2 --name=StorageInterface
 type StorageInterface interface {
 	GetAllBeverages(ctx context.Context) ([]Beverage, error)
 	GetBeverage(ctx context.Context, id int) (*Beverage, error)
